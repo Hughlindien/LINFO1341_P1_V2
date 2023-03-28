@@ -1,6 +1,6 @@
 # LINFO1341 : projet 1
 
-Siberdt Hugo (32302000) et Schrobiltgen Dorian (...)
+Siberdt Hugo (32302000) et Schrobiltgen Dorian (26462000)
 
 ---
 ## Utilisation du programme
