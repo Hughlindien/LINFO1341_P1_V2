@@ -33,7 +33,7 @@ plt.ylabel("Nombre de résolutions")
 #plt.axvline(x=pkt_time_array[end] , color='red', linestyle="--")
 plt.xticks(rotation=90, ha='right')
 plt.legend()
-plt.savefig("../Images/dns_time_vid")
+plt.savefig("../Images/dns_time_msg")
 plt.show()
 
 
@@ -61,7 +61,7 @@ plt.title("Pie chart du nombre de résolutions des domaines")
 colors = plt.cm.tab20(np.linspace(0, 1, len(domains_names)))
 plt.pie(sizes, explode=explode, labels=labels, shadow=False, colors=colors,autopct='%1.1f%%', startangle=140)
 plt.axis('equal')
-plt.savefig("../Images/dns_dom_vid")
+plt.savefig("../Images/dns_dom_msg")
 plt.show()
 
 
@@ -70,7 +70,7 @@ plt.title("Pie chart du nombre de résolutions des domaines")
 colors = plt.cm.tab20(np.linspace(0, 1, len(domains_names)))
 plt.pie(sizes, explode=explode, shadow=False, colors=colors,autopct='%1.1f%%', startangle=140)
 plt.axis('equal')
-plt.savefig("../Images/dns_dom_vid_no_labels")
+plt.savefig("../Images/dns_dom_msg_no_labels")
 plt.show()
 
 # Pie chart des administrateurs des domaines
@@ -97,7 +97,7 @@ plt.title("Pie chart des administrateurs des domaines")
 colors = plt.cm.tab20(np.linspace(0, 1, len(owner)))
 plt.pie(sizes, explode=explode, labels=labels, shadow=False, colors=colors,autopct='%1.1f%%', startangle=140)
 plt.axis('equal')
-plt.savefig("../Images/dns_admin_vid")
+plt.savefig("../Images/dns_admin_msg")
 plt.show()
 
 # Pie chart des registrant des domaines
@@ -124,5 +124,5 @@ plt.title("Pie chart des registrant des domaines")
 colors = plt.cm.tab20(np.linspace(0, 1, len(registrant)))
 plt.pie(sizes, explode=explode, labels=labels, shadow=False, colors=colors,autopct='%1.1f%%', startangle=140)
 plt.axis('equal')
-plt.savefig("../Images/dns_reg_vid")
+plt.savefig("../Images/dns_reg_msg")
 plt.show()

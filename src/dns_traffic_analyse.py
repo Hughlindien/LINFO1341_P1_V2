@@ -7,8 +7,8 @@ import re
 import pyshark
 
 # Ouverture de la trace
-cap = pyshark.FileCapture('Captures/vidéo.pcapng', only_summaries=False)
-
+cap= pyshark.FileCapture('../Captures/Test1_Message.pcapng', only_summaries=False)
+#cap= pyshark.FileCapture('../Captures/test_3_appel.pcapng', only_summaries=False)
 quest = 0 # Nombre de requêtes
 rep= 0 # Nombre de réponses
 
@@ -38,6 +38,7 @@ pkt_time_array = []
 
 # Organisations à qui appartiennent les noms de domaines
 owner = dict()
+registrant = dict()
 
 
 
@@ -211,7 +212,42 @@ for key in auth_serv.keys():
     else :
         org_admin = None
 
-"""
+
+# On regarde qui est registrant des noms de domaine
+for key in domains_names.keys():
+
+    out = subprocess.check_output(["whois", extract_domain(key)], universal_newlines=True)
+    reg = re.search(r"Registrant Organization:\s*(.+)", out)
+
+    if reg :
+        org_reg = reg.group(1)
+
+        # Ajout dans le dictionnaire
+        if registrant.get(org_reg):
+            registrant[org_reg].add(key)
+        else:
+            if org_reg == 'REDACTED FOR PRIVACY': # On ira chercher dans les serveurs autoritaires
+                pass
+            else:
+                registrant[org_reg] = set()
+                registrant[org_reg].add(key)
+
+    else :
+        org_reg = None
+
+# On regarde pour les domaines qui qui on un serveur autoritaire
+for key in auth_serv.keys():
+
+    out = subprocess.check_output(["whois", extract_domain(key)], universal_newlines=True)
+    reg = re.search(r"Registrant Organization:\s*(.+)", out)
+
+    if reg :
+        org_reg = reg.group(1)
+        registrant[org_reg] = auth_serv.get(key) # Toujours des registrant différents
+
+    else :
+        org_reg = None
+
 # Affiche les données
 print("Nombre de questions : ", quest)
 print("Nombre de réponses : ", rep)
@@ -233,5 +269,5 @@ print(f"Nombre de records additionnels : {count_add_record}  répartis sur {coun
 print(f"Types des queries dans les records additionel des demandes :", type_qry_add_record)
 print(f"Noms des queries dans les records additionel des demandes :", name_qry_add_record)
 print(f"Administrateur des domaines :", owner)
+print(f"Registrant des domaines :", registrant)
 print("==================")
-"""
