@@ -7,8 +7,8 @@ import re
 import pyshark
 
 # Ouverture de la trace
-cap= pyshark.FileCapture('../Captures/Test1_Message.pcapng', only_summaries=False)
-#cap= pyshark.FileCapture('../Captures/test_3_appel.pcapng', only_summaries=False)
+#cap= pyshark.FileCapture('../Captures/Test1_Message.pcapng', only_summaries=False)
+cap= pyshark.FileCapture('../Captures/test_3_appel.pcapng', only_summaries=False)
 quest = 0 # Nombre de requêtes
 rep= 0 # Nombre de réponses
 
@@ -83,99 +83,98 @@ def extract_domain(url):
 # Code principal
 for pkt in cap:
 
-    high = pkt.highest_layer # On regarde uniquement la couche la plus haute
+    for i in pkt.layers:
+        if i.layer_name == 'dns':
+            dns_layer = pkt[i.layer_name]  # On regarde la requête DNS
 
-    if high == 'DNS': # Si c'est une reqête DNS
-        dns_layer = pkt[high]  # On regarde la requête DNS
-
-        # Ajoute le type de requête à l'ensemble
-        type_of = dns_layer.qry_type.showname_value
-        if types_qry.get(type_of):
-            types_qry[type_of] += 1
-        else:
-            types_qry[type_of] = 1
-
-        # Additionnal record
-        count_add_record += int(dns_layer.count_add_rr)
-        if int(dns_layer.count_add_rr) != 0:
-            count_pkt_add_record += 1
-
-        # Serveur autoritaire
-        count_auth_rr += int(dns_layer.count_auth_rr)
-        if int(dns_layer.count_auth_rr) == 1:  # S'il y a un serveur autoritaire
-            name_auth = dns_layer.soa_mname
-            if  auth_serv.get(name_auth):
-                auth_serv[name_auth].add(dns_layer.qry_name)
+            # Ajoute le type de requête à l'ensemble
+            type_of = dns_layer.qry_type.showname_value
+            if types_qry.get(type_of):
+                types_qry[type_of] += 1
             else:
-                auth_serv[name_auth] = set()
-                auth_serv[name_auth].add(dns_layer.qry_name)
+                types_qry[type_of] = 1
 
-        if int(dns_layer.flags_response) == 1:  # Regarde si c'est une réponse
-            rep += 1
+            # Additionnal record
+            count_add_record += int(dns_layer.count_add_rr)
+            if int(dns_layer.count_add_rr) != 0:
+                count_pkt_add_record += 1
 
-            # Nombre de fois qu'on demande une résolution de domaine et quand
-            pkt_hour = pkt.sniff_time.time().hour
-            pkt_min = pkt.sniff_time.time().minute
-            pkt_sec = pkt.sniff_time.time().second
-            sniff_time = f"{pkt_hour}:{pkt_min}:{pkt_sec}"
-
-            # Adresses
-            if hasattr(dns_layer, 'a'):  # Récupère l'adresse ipv4
-                type_A += 1
-
-                add_dico(dns_layer, domains_names, time=sniff_time, adresse=dns_layer.a)
-
-                # Ajoute au dico_ipv4
-                if dico_ipv4.get(dns_layer.a):
-                    dico_ipv4[dns_layer.a] += 1
+            # Serveur autoritaire
+            count_auth_rr += int(dns_layer.count_auth_rr)
+            if int(dns_layer.count_auth_rr) == 1:  # S'il y a un serveur autoritaire
+                name_auth = dns_layer.soa_mname
+                if  auth_serv.get(name_auth):
+                    auth_serv[name_auth].add(dns_layer.qry_name)
                 else:
-                    dico_ipv4[dns_layer.a] = 1
+                    auth_serv[name_auth] = set()
+                    auth_serv[name_auth].add(dns_layer.qry_name)
 
-            elif hasattr(dns_layer, 'aaaa'):  # Récupère l'adresse ipv6
-                type_AAAA += 1
+            if int(dns_layer.flags_response) == 1:  # Regarde si c'est une réponse
+                rep += 1
 
-                add_dico(dns_layer, domains_names, time=sniff_time, adresse=dns_layer.aaaa)
+                # Nombre de fois qu'on demande une résolution de domaine et quand
+                pkt_hour = pkt.sniff_time.time().hour
+                pkt_min = pkt.sniff_time.time().minute
+                pkt_sec = pkt.sniff_time.time().second
+                sniff_time = f"{pkt_hour}:{pkt_min}:{pkt_sec}"
 
-                # Ajoute au dico_ipv6
-                if dico_ipv6.get(dns_layer.aaaa):
-                    dico_ipv6[dns_layer.aaaa] += 1
-                else:
-                    dico_ipv6[dns_layer.aaaa] = 1
+                # Adresses
+                if hasattr(dns_layer, 'a'):  # Récupère l'adresse ipv4
+                    type_A += 1
 
-            else:  # Si on n'obtient pas l'adresse (indique qu'il faut demander au serveur autoritaire)
-                if domains_names_no_adr.get(dns_layer.qry_name):
-                    domains_names_no_adr[dns_layer.qry_name] += 1
-                else:
-                    domains_names_no_adr[dns_layer.qry_name] = 1
+                    add_dico(dns_layer, domains_names, time=sniff_time, adresse=dns_layer.a)
 
-        else:  # C'est une demande
-            quest+= 1
+                    # Ajoute au dico_ipv4
+                    if dico_ipv4.get(dns_layer.a):
+                        dico_ipv4[dns_layer.a] += 1
+                    else:
+                        dico_ipv4[dns_layer.a] = 1
 
-            # Vérifie simpelement le nombre de records additionnels dans les demandes
-            if int(dns_layer.count_add_rr) > 1:
-                print("More than one add_rr")
+                elif hasattr(dns_layer, 'aaaa'):  # Récupère l'adresse ipv6
+                    type_AAAA += 1
 
-            # Regarde le type et le de requête dans le record additionnel aisni que les noms de domaines
-            elif int(dns_layer.count_add_rr) == 1:
+                    add_dico(dns_layer, domains_names, time=sniff_time, adresse=dns_layer.aaaa)
 
-                name_add_qry = dns_layer.resp_name
-                if type_qry_add_record.get(name_add_qry):
-                    type_qry_add_record[name_add_qry] += 1
-                else:
-                    type_qry_add_record[name_add_qry] = 1
+                    # Ajoute au dico_ipv6
+                    if dico_ipv6.get(dns_layer.aaaa):
+                        dico_ipv6[dns_layer.aaaa] += 1
+                    else:
+                        dico_ipv6[dns_layer.aaaa] = 1
 
-                type_add_qry = dns_layer.resp_type.showname_value
-                if name_qry_add_record.get(type_add_qry):
-                    name_qry_add_record[ type_add_qry] += 1
-                else:
-                    name_qry_add_record[ type_add_qry] = 1
+                else:  # Si on n'obtient pas l'adresse (indique qu'il faut demander au serveur autoritaire)
+                    if domains_names_no_adr.get(dns_layer.qry_name):
+                        domains_names_no_adr[dns_layer.qry_name] += 1
+                    else:
+                        domains_names_no_adr[dns_layer.qry_name] = 1
 
-    # liste des temps
-    packet_hour = pkt.sniff_time.time().hour
-    packet_min = pkt.sniff_time.time().minute
-    packet_sec = pkt.sniff_time.time().second
-    if f"{packet_hour}:{packet_min}:{packet_sec}" not in pkt_time_array:
-        pkt_time_array.append(f"{packet_hour}:{packet_min}:{packet_sec}")
+            else:  # C'est une demande
+                quest+= 1
+
+                # Vérifie simpelement le nombre de records additionnels dans les demandes
+                if int(dns_layer.count_add_rr) > 1:
+                    print("More than one add_rr")
+
+                # Regarde le type et le de requête dans le record additionnel aisni que les noms de domaines
+                elif int(dns_layer.count_add_rr) == 1:
+
+                    name_add_qry = dns_layer.resp_name
+                    if type_qry_add_record.get(name_add_qry):
+                        type_qry_add_record[name_add_qry] += 1
+                    else:
+                        type_qry_add_record[name_add_qry] = 1
+
+                    type_add_qry = dns_layer.resp_type.showname_value
+                    if name_qry_add_record.get(type_add_qry):
+                        name_qry_add_record[ type_add_qry] += 1
+                    else:
+                        name_qry_add_record[ type_add_qry] = 1
+
+        # liste des temps
+        packet_hour = pkt.sniff_time.time().hour
+        packet_min = pkt.sniff_time.time().minute
+        packet_sec = pkt.sniff_time.time().second
+        if f"{packet_hour}:{packet_min}:{packet_sec}" not in pkt_time_array:
+            pkt_time_array.append(f"{packet_hour}:{packet_min}:{packet_sec}")
 
 # On regarde à qui appartient le nom de domaine
 for key in domains_names.keys():
