@@ -13,17 +13,11 @@ def add_dico_time(dico, elem, time):
 def get_dom_at_time(dico, elem, time):
     dom_time = [0 for _ in range(len(time))]
     for t in range(len(time)):
-        if time[t] in dico.get(elem):
-            for j in dico.get(elem):
-                if j == time[t]:
-                    dom_time[t] += 1
-        else:
-            dom_time[t] = 0
+        dom_time[t] += dico.get(elem).count(time[t])
     return dom_time
 
 
 names = ['../captures/test1v2.pcapng', '../captures/test2v2.pcapng', '../captures/test3v2.pcapng', '../captures/test4v2.pcapng']
-
 """
 pkt_arrays = []
 for name in names:
@@ -60,13 +54,18 @@ plt.show()
 """
 
 time_array = []
-dic_lst = []
 for name in names:
-    deb = dict()
     cap = pyshark.FileCapture(name, only_summaries=False)
     for packet in cap:
         if int(packet.sniff_time.timestamp()) - int(cap[0].sniff_time.timestamp()) not in time_array:
             time_array.append(int(packet.sniff_time.timestamp()) - int(cap[0].sniff_time.timestamp()))
+    cap.close()
+
+dic_lst = []
+for name in names:
+    cap = pyshark.FileCapture(name, only_summaries=False)
+    deb = dict()
+    for packet in cap:
         add_dico_time(deb, 'paquets', int(packet.sniff_time.timestamp() - cap[0].sniff_time.timestamp()))
     dic_lst.append(deb)
     cap.close()
@@ -80,5 +79,5 @@ plt.xlabel("Temps [s]")
 plt.ylabel("Nombre de paquets")
 plt.xticks(rotation=90, ha='right')
 plt.legend()
-#plt.savefig("../images/time_deb")
+#plt.savefig("../images/time_deb.pdf")
 plt.show()

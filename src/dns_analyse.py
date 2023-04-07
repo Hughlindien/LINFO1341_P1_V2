@@ -43,12 +43,7 @@ def add_dico_set(dico, elem, to_add):
 def get_dom_at_time(dico, elem, time):
     dom_time = [0 for _ in range(len(time))]
     for t in range(len(time)):
-        if time[t] in dico.get(elem):
-            for j in dico.get(elem):
-                if j == time[t]:
-                    dom_time[t] += 1
-        else:
-            dom_time[t] = 0
+        dom_time[t] += dico.get(elem).count(time[t])
     return dom_time
 
 def whois_reg(dic_info, dic_final):
