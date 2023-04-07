@@ -9,7 +9,6 @@ for name in names:
     cap = pyshark.FileCapture(name, only_summaries=False)
     pkt_array = []
     for packet in cap:
-        #protocol_name = packet.highest_layer
         transport_name = packet.transport_layer
         if transport_name is None:
             pkt_array.append("None")
@@ -17,14 +16,25 @@ for name in names:
             pkt_array.append(transport_name)
     pkt_arrays.append(pkt_array)
     cap.close()
+    
+"""
+for name in names:
+    cap = pyshark.FileCapture(name, only_summaries=False)
+    pkt_array = []
+    for packet in cap:
+        for j in packet.layers:
+            pkt_array.append(j.layer_name)
+    pkt_arrays.append(pkt_array)
+    cap.close()
+"""
 
 fig = plt.figure()
-fig.set_size_inches(15,8)
-plt.title("Histogramme des différents protocoles de transport")
-plt.xlabel('Protocoles de transport')
+fig.set_size_inches(20,10)
+plt.title("Histogramme des différents layers")
+plt.xlabel('Layers')
 plt.ylabel('Nombre de paquets')
 plt.hist(pkt_arrays, bins = 30, edgecolor='blue', alpha=.75, label=["messages", "fichiers", "vidéo", "vocal"])
 plt.grid(True)
 plt.legend()
-plt.savefig("../images/hist_transport.pdf")
+plt.savefig("../images/hist_layers.pdf")
 plt.show()
