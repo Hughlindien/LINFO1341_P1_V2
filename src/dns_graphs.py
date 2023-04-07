@@ -51,7 +51,7 @@ pie_chart(owner_auth, "Propriétaires des sereurs autoritatifs")
 
 
 
-colors = plt.cm.tab20(np.linspace(0, 1, len(res_dom)))
+colors = plt.cm.tab20(np.linspace(0, 1, len(deb_dns)))
 plt.title("Nombre de paquets dns en fonction du temps")
 plt.plot(time_array, get_dom_at_time(deb_dns,'dns',time_array), color=colors[i], label="paquets dns")
 plt.xlabel("Temps [s]")
