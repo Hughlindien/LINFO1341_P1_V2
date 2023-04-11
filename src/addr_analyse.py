@@ -139,13 +139,14 @@ def pie_chart(dico, title, save=None):
     explode[index] = 0.1
 
     colors = plt.cm.tab20(np.linspace(0, 1, len(dico)))
+    plt.figure(figsize=(12, 12))
     plt.title(title)
     plt.pie(sizes, explode=explode, labels=labels, shadow=False, colors=colors, autopct='%1.1f%%', startangle=140)
     plt.axis('equal')
-    #plt.savefig(f"../images/{save}.pdf")
+    plt.savefig(f"../images/{save}.pdf")
     plt.show()
 
-pie_chart(admin_country, "Pays d'enregistrement des adresses IP", save="country.pdf")
-pie_chart(admin_pub_addr, "Pays d'enregistrement des adresses IP", save="organisations.pdf")
+pie_chart(admin_country, "Pays d'enregistrement des adresses IP", save="country")
+pie_chart(admin_pub_addr, "Organisations responsables des adresses IP", save="organisations")
 
 
