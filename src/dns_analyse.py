@@ -110,6 +110,7 @@ for pkt in cap:
                     err += 1
                     type_error = dns_layer.flags_rcode.showname_value
                     add_dic(types_err, type_error)
+                    print(dns_layer.qry_name)
 
                 if hasattr(dns_layer, 'resp_type'):
                     type_of = dns_layer.resp_type.showname_value
